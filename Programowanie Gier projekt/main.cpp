@@ -199,10 +199,29 @@ int main()
 
         glm::vec3 camera_destination = Me.position;
         glm::vec3 camera_position = Me.position + camera_move;
+        glm::mat2 rotation_matrix;
+        rotation_matrix[0][0] = glm::cos(rot_angle);
+        rotation_matrix[0][1] = -glm::sin(rot_angle);
+        rotation_matrix[1][0] = glm::sin(rot_angle);
+        rotation_matrix[1][1] = glm::cos(rot_angle);
+        glm::vec2 temp_camera_pos(camera_position.z - Me.position.z, camera_position.x - Me.position.x);
+        temp_camera_pos = rotation_matrix * temp_camera_pos;
+        camera_position[0] = temp_camera_pos[0] + Me.position.x;
+        camera_position[2] = temp_camera_pos[1] + Me.position.z;
+        system("cls");
+        std::cout << "camera"<<std::endl;
+        std::cout << "x: " << camera_position.x << std::endl;
+        std::cout << "y: " << camera_position.y << std::endl;
+        std::cout << "z: " << camera_position.z << std::endl;
+        std::cout << "player" << std::endl;
+        std::cout << "x: " << Me.position.x << std::endl;
+        std::cout << "y: " << Me.position.y << std::endl;
+        std::cout << "z: " << Me.position.z << std::endl;
+
         glm::vec3 camera_up = up_vector;
 
         glm::mat4 ViewMatrix = glm::lookAt(camera_position, camera_destination, camera_up);
-
+      
         //Model matrix
 
         glm::mat4 ModelMatrix = glm::mat4(1.0f);

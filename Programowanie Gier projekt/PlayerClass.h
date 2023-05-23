@@ -16,7 +16,7 @@ public:
 	Player()
 	{
 		jump_active = false;
-		position = glm::vec3(0.0f, 0.0f, -2.0f);
+		position = glm::vec3(0.0f, 0.0f, 0.0f);
 		color = glm::vec3(0.0f, 0.0f, 1.0f);
 		speed = 0.5f;
 		jump_speed = 2.0f;
