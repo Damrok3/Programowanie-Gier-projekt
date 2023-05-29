@@ -31,7 +31,9 @@ glm::vec3 up_vector = glm::vec3(0.0f, 1.0f, 0.0f);
 float g = -9.98f;
 float currentY = 0.0f;
 float timeSinceLastMove = 0.0f;
+float timeSinceBulletCreated = 0.0f;
 bool hasEnemyMovedYet = false;
+int score = 0;
 
 //shaders
 const char* vertexShaderSource = R"glsl(
@@ -66,12 +68,12 @@ float cooldown = 0;
 int main()
 {
     srand(time(NULL));
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 6; i++)
     {
         blocks.push_back(new Block(
             glm::vec3((int)rand() % 40 - 20, 0.0f, (int)rand() % 70 - 20), 
             glm::vec3(1, 0.9, 1), 
-            glm::vec3(0.3f, 0.3f, 0.3f)
+            glm::vec3(1.0f, 0.0f, 0.0f)
             ));
     }
     glfwInit();
@@ -247,13 +249,12 @@ int main()
         //qube
 
         Me.CheckJump((float)glfwGetTime(), g, currentY);
-        Me.colorCheck();
 
         ModelMatrix = glm::translate(glm::mat4(1.0f), Me.position);
         ModelMatrix = glm::rotate(ModelMatrix, rot_angle, glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 
-        glUniform4f(1, Me.color.x, Me.color.y, Me.color.z, 1.0f);
+        glUniform4f(1, 0.0f, 0.0f, 1.0f, 1.0f);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         for (auto b : blocks)
@@ -262,7 +263,7 @@ int main()
             b->location.z += b->velocityy;
             ModelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), b->GetLocation()), b->GetScale());
             glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
-            glUniform4f(4, b->GetColor().x, b->GetColor().y, b->GetColor().z, 0.0f);
+            glUniform4f(1, b->GetColor().x, b->GetColor().y, b->GetColor().z, 0.0f);
             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         }
@@ -304,10 +305,43 @@ int main()
             }
         }
 
+        //killing bullets
+        if (blocks.size() > 6)
+        {
+            float timeThatBulletExisted = (float)glfwGetTime() - timeSinceBulletCreated;
+            if (timeThatBulletExisted > 0.5f)
+            {
+                blocks.pop_back();
+            }
+        }
+        //killing enemies
+        if (blocks.size() >= 7)
+        {
+            for (int i = 0; i < blocks.size(); i++)
+            {
+                glm::vec3 distance = blocks[i]->location - blocks[blocks.size() - 1]->location;
+                float distLength = sqrt(distance.x * distance.x + distance.y * distance.y + distance.z * distance.z);
+                if (distLength < 1 && i < blocks.size() - 1)
+                {
+                    blocks.erase(blocks.begin() + i);
+                    system("cls");
+                    if (score < 5)
+                    {
+                        std::cout << "Your score is: " << ++score << "!";
+                    }
+                    else
+                    {
+                        std::cout << "Congratulations! You Won!";
+                    }
+                }
+            }
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
+    
+    
     glDeleteVertexArrays(1, &VertexArrayId);
     glDeleteBuffers(1, &VertexBufferId);
     glDeleteBuffers(1, &ElementBufferId);
@@ -348,7 +382,7 @@ void processInput(GLFWwindow* window)
     //bullet generation
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
     {
-        if (cooldown >= 2)
+        if (cooldown >= 2 && blocks.size() < 7)
         {
             cooldown = 0;
             blocks.push_back((new Block(
@@ -359,6 +393,7 @@ void processInput(GLFWwindow* window)
                 ), 
                 glm::vec3(0.2f, 0.2f, 0.2f), 
                 glm::vec3(0.3f, 0.3f, 0.3f)))->SetAsBullet(glm::cos(rot_angle) * 2, -glm::sin(rot_angle) * 2));
+                timeSinceBulletCreated = (float)glfwGetTime();
         }
     }
 }

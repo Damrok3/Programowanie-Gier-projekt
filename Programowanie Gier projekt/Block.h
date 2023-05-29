@@ -27,7 +27,7 @@ public:
     bool isBullet;
     float deltaHorizontalSpeed;
 
-    Block(glm::vec3 _location, glm::vec3 _scale, glm::vec3 _color = glm::vec3(0.0f, 1.0f, 0.0f))
+    Block(glm::vec3 _location, glm::vec3 _scale, glm::vec3 _color)
     {
         location = _location;
         scale = _scale;
