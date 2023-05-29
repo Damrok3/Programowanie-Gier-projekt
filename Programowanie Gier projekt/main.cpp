@@ -30,6 +30,8 @@ glm::vec3 camera_move(0.0f, 5.0f, -10.0f);
 glm::vec3 up_vector = glm::vec3(0.0f, 1.0f, 0.0f);
 float g = -9.98f;
 float currentY = 0.0f;
+float timeSinceLastMove = 0.0f;
+bool hasEnemyMovedYet = false;
 
 //shaders
 const char* vertexShaderSource = R"glsl(
@@ -64,13 +66,14 @@ float cooldown = 0;
 int main()
 {
     srand(time(NULL));
-    blocks.push_back(new Block(
-        glm::vec3((int)rand() % 40 - 20, 0.0f, 
-        (int)rand() % 70 - 20), 
-        glm::vec3(1, 0.9, 1), 
-        glm::vec3(0.3f, 0.3f, 0.3f)
-        ));
-
+    for (int i = 0; i < 4; i++)
+    {
+        blocks.push_back(new Block(
+            glm::vec3((int)rand() % 40 - 20, 0.0f, (int)rand() % 70 - 20), 
+            glm::vec3(1, 0.9, 1), 
+            glm::vec3(0.3f, 0.3f, 0.3f)
+            ));
+    }
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -264,6 +267,43 @@ int main()
 
         }
 
+        //enemy movement
+
+        float enemyMoveTimeout = float(glfwGetTime()) - timeSinceLastMove;
+        if (enemyMoveTimeout > 1.0f || hasEnemyMovedYet == false)
+        {
+            hasEnemyMovedYet = true;
+            timeSinceLastMove = float(glfwGetTime());
+            for (auto b : blocks)
+            {
+                if (!b->isBullet)
+                {
+                    int direction = (int)rand() % 4;
+                    switch (direction)
+                    {
+                        case 0:
+                            b->velocityx = 0.05;
+                            b->velocityy = 0;
+                            break;
+                        case 1:
+                            b->velocityx = -0.05;
+                            b->velocityy = 0;
+                            break;
+                        case 2:
+                            b->velocityy = 0.05;
+                            b->velocityx = 0;
+                            break;
+                        case 3:
+                            b->velocityy = -0.05;
+                            b->velocityx = 0;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -305,6 +345,7 @@ void processInput(GLFWwindow* window)
         camera_move = glm::vec3(0.0f, 5.0f, -10.0f);
         up_vector = glm::vec3(0.0f, 1.0f, 0.0f);
     }
+    //bullet generation
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
     {
         if (cooldown >= 2)
@@ -318,7 +359,6 @@ void processInput(GLFWwindow* window)
                 ), 
                 glm::vec3(0.2f, 0.2f, 0.2f), 
                 glm::vec3(0.3f, 0.3f, 0.3f)))->SetAsBullet(glm::cos(rot_angle) * 2, -glm::sin(rot_angle) * 2));
-
         }
     }
 }
