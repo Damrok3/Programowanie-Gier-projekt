@@ -5,6 +5,7 @@
 #include <gtc/type_ptr.hpp>
 #include <cmath>
 
+
 class Player {
 public:
 	glm::vec3 position;
