@@ -7,7 +7,83 @@
 
 #include "PlayerClass.h"
 
+#include<cstdlib>
+#include<ctime>
+#include <vector>
 #include <iostream>
+#define PI 3.141592653589793238462643383279502884197
+
+class Block
+{
+private:
+
+    glm::vec3 scale;
+    glm::vec3 color;
+    float moveRangeHorizontal;
+    float moveRangeVertical;
+    float orbitRadius;
+    float orbitOffset;
+    float RPM;
+    float lastFrameX;
+public:
+    glm::vec3 location;
+    float velocityx;
+    float velocityy;
+    bool isBullet;
+    float deltaHorizontalSpeed;
+    Block(glm::vec3 _location, glm::vec3 _scale, glm::vec3 _color = glm::vec3(0.0f, 1.0f, 0.0f))
+    {
+        location = _location;
+        scale = _scale;
+        color = _color;
+        moveRangeHorizontal = 0;
+        moveRangeVertical = 0;
+        orbitRadius = 0;
+        float orbitOffset = 0;
+        RPM = 0;
+        isBullet = false;
+        lastFrameX = location.x;
+        deltaHorizontalSpeed = 0;
+        velocityx = 0;
+        velocityy = 0;
+    }
+    Block* SetMovingRange(float _moveRangeHorizontal, float _moveRangeVertical)
+    {
+        moveRangeHorizontal = _moveRangeHorizontal;
+        moveRangeVertical = _moveRangeVertical;
+        return this;
+    }
+    void SetRotation(float _orbitRadius, float _RPM, float _orbitOffset = 0)
+    {
+        orbitRadius = _orbitRadius;
+        RPM = _RPM;
+        orbitOffset = _orbitOffset;
+    }
+    glm::vec3 GetLocation() // PI * 2 * (glfwGetTime() * RPM /60)
+    {
+        glm::vec3 newPosition = location
+            + glm::vec3(moveRangeHorizontal * cos(glfwGetTime()), moveRangeVertical * sin(glfwGetTime()), 0.0f)
+            + orbitRadius * glm::vec3(sin(PI * 2 * (glfwGetTime() * RPM / 60) + orbitOffset), -cos(PI * 2 * (glfwGetTime() * RPM / 60) + orbitOffset), 0.0f);
+        deltaHorizontalSpeed = newPosition.x - lastFrameX;
+        lastFrameX = newPosition.x;
+        return newPosition;
+    }
+    glm::vec3 GetScale()
+    {
+        return scale;
+    }
+    glm::vec3 GetColor()
+    {
+        return color;
+    }
+    Block* SetAsBullet(float _velocityx, float _velocityy)
+    {
+        isBullet = true;
+        velocityx = _velocityx;
+        velocityy = _velocityy;
+        return this;
+    }
+};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -52,8 +128,19 @@ void main()
 }
 )glsl";
 
+std::vector<Block*> blocks;
+float cooldown = 0;
+
 int main()
 {
+    srand(time(NULL));
+    blocks.push_back(new Block(
+        glm::vec3((int)rand() % 40 - 20, 0.0f, 
+        (int)rand() % 70 - 20), 
+        glm::vec3(1, 0.9, 1), 
+        glm::vec3(0.3f, 0.3f, 0.3f)
+        ));
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -236,6 +323,17 @@ int main()
         glUniform4f(1, Me.color.x, Me.color.y, Me.color.z, 1.0f);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
+        for (auto b : blocks)
+        {
+            b->location.x += b->velocityx;
+            b->location.z += b->velocityy;
+            ModelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), b->GetLocation()), b->GetScale());
+            glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
+            glUniform4f(4, b->GetColor().x, b->GetColor().y, b->GetColor().z, 0.0f);
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -251,6 +349,8 @@ int main()
 
 void processInput(GLFWwindow* window)
 {
+    cooldown += 0.1;
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
@@ -274,6 +374,22 @@ void processInput(GLFWwindow* window)
     {
         camera_move = glm::vec3(0.0f, 5.0f, -10.0f);
         up_vector = glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+    {
+        if (cooldown >= 2)
+        {
+            cooldown = 0;
+            blocks.push_back((new Block(
+                glm::vec3(Me.position.x + glm::cos(rot_angle) * 2,
+                Me.position.y, 
+                Me.position.z - glm::sin(rot_angle) * 2), 
+                glm::vec3(0.2f, 0.2f, 0.2f), 
+                glm::vec3(0.3f, 0.3f, 0.3f)))->SetAsBullet(glm::cos(rot_angle) * 2,
+                -glm::sin(rot_angle) * 2)
+                );
+
+        }
     }
 }
 

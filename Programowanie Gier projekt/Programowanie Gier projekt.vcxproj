@@ -104,13 +104,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Damrok\Desktop\libraries2\glfw-3.3.8.bin.WIN64\include;C:\Users\Damrok\Desktop\libraries2\glad\include;C:\Users\Damrok\Desktop\libraries2\glm;C:\Users\Damrok\Desktop\libraries2\image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ckm76\OneDrive\Desktop\libraries2\glfw-3.3.8.bin.WIN64\include;C:\Users\ckm76\OneDrive\Desktop\libraries2\glm;C:\Users\ckm76\OneDrive\Desktop\libraries2\glad\include;C:\Users\Damrok\Desktop\libraries2\glfw-3.3.8.bin.WIN64\include;C:\Users\Damrok\Desktop\libraries2\glad\include;C:\Users\Damrok\Desktop\libraries2\glm;C:\Users\Damrok\Desktop\libraries2\image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Damrok\Desktop\libraries2\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;gdi32.lib;user32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\ckm76\OneDrive\Desktop\libraries2\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\Users\Damrok\Desktop\libraries2\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,12 +121,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\ckm76\OneDrive\Desktop\libraries2\glfw-3.3.8.bin.WIN64\include;C:\Users\ckm76\OneDrive\Desktop\libraries2\glm;C:\Users\ckm76\OneDrive\Desktop\libraries2\glad\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\ckm76\OneDrive\Desktop\libraries2\glfw-3.3.8.bin.WIN64\lib-vc2022;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
