@@ -445,7 +445,7 @@ int main()
             for (int i = 0; i < blocks.size(); i++)
             {
                 glm::vec3 distance = blocks[i]->location - blocks[blocks.size() - 1]->location;
-                float distLength = sqrt(distance.x * distance.x + distance.y * distance.y + distance.z * distance.z);
+                float distLength = glm::length(distance);
                 if (distLength < 1 && i < blocks.size() - 1)
                 {
                     blocks.erase(blocks.begin() + i);
