@@ -12,7 +12,8 @@
 #include<ctime>
 #include <vector>
 #include <iostream>
-
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -40,25 +41,32 @@ const char* vertexShaderSource = R"glsl(
 #version 430 core
 
 layout (location = 0) in vec3 Pos;
+layout (location = 1) in vec2 UVPos;
 layout (location = 2) uniform mat4 u_ProjMatrix;
 layout (location = 3) uniform mat4 u_ViewMatrix;
 layout (location = 4) uniform mat4 u_ModelMatrix;
 
+out vec2 UV;
+
 void main()
 {
    gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * vec4(Pos, 1.0);
+   UV = UVPos;
 }
 )glsl";
 
 const char* fragmentShaderSource = R"glsl(
 #version 430 core
 
-layout (location = 1) uniform vec4 TriangleColor;
-
 out vec4 FragColor;
+in vec2 UV;
+
+uniform sampler2D TextureSampler;
+layout (location = 6) uniform vec4 CubeColor;
+
 void main()
 {
-   FragColor = TriangleColor;
+    FragColor = texture(TextureSampler, UV) * CubeColor;
 }
 )glsl";
 
@@ -144,58 +152,167 @@ int main()
     glDeleteShader(fragmentShader);
 
 
-    static const float Qube[] = {
-      -0.5f, -0.5f, -0.5f, //bottom
-       0.5f, -0.5f, -0.5f,
-       0.5f,  0.5f, -0.5f,
-      -0.5f,  0.5f, -0.5f,
+    static const float Objects[] = {
+        //ground
+        -50.0f, -0.5f, -50.0f, 0.0f, 0.0f,
+        50.0f, -0.5f, -50.0f, 5.0f, 0.0f,
+        50.0f, -0.5f,  50.0f, 5.0f, 5.0f,
 
-      -0.5f, -0.5f,  0.5f, //top
-       0.5f, -0.5f,  0.5f,
-       0.5f,  0.5f,  0.5f,
-      -0.5f,  0.5f,  0.5f,
+        50.0f, -0.5f,  50.0f, 5.0f, 5.0f,
+        -50.0f, -0.5f,  50.0f, 0.0f, 5.0f,
+        -50.0f, -0.5f, -50.0f, 0.0f,  0.0f,
 
-      -20.0f, -0.5f, 50.0f, //ground
-      -20.0f, -0.5f, -50.0f,
-       20.0f, -0.5f, -50.0f,
-       20.0f, -0.5f, 50.0f
+        //cube
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //bottom
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f,
+
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, //top
+         0.5f, 0.5f, -0.5f, 1.0f, 0.0f,
+         0.5f, 0.5f,  0.5f, 1.0f, 1.0f,
+
+         0.5f, 0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f, 0.5f,  0.5f, 0.0f, 1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //front
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, //back
+         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //left
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+         0.5f, -0.5f, -0.5f, 0.0f, 0.0f, //right
+         0.5f,  0.5f, -0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
     };
 
-    unsigned int Indices[] = {
-      0, 1, 2, //bottom
-      2, 3, 0,
-      4, 5, 6, //top
-      6, 7, 4,
-      0, 1, 5, //first side
-      5, 4, 0,
-      1, 2, 6, //second side
-      6, 5, 1,
-      2, 3, 7, //third side
-      7, 6, 2,
-      3, 0, 4, //fourth side
-      4, 7, 3,
-
-      8, 9, 10, //ground
-      10, 11, 8
-    };
-
-    unsigned int VertexBufferId, VertexArrayId, ElementBufferId;
+    unsigned int VertexBufferId, VertexArrayId;
     glGenVertexArrays(1, &VertexArrayId);
     glGenBuffers(1, &VertexBufferId);
-    glGenBuffers(1, &ElementBufferId);
     glBindVertexArray(VertexArrayId);
 
     glBindBuffer(GL_ARRAY_BUFFER, VertexBufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Qube), Qube, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBufferId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Objects), Objects, GL_STATIC_DRAW);
+    
+    //position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindVertexArray(0);
+    //texture attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    //load and create a first texture
+    unsigned int textureFloorId;
+
+    glGenTextures(1, &textureFloorId);
+    glBindTexture(GL_TEXTURE_2D, textureFloorId);
+    
+    //set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    //load image, create texture and generate mipmaps
+    int tex_width, tex_height, tex_nr_Channels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    unsigned char* data = stbi_load("floor.jpg", &tex_width, &tex_height, &tex_nr_Channels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    //load and create a second texture 
+    unsigned int textureCubeId;
+
+    glGenTextures(1, &textureCubeId);
+    glBindTexture(GL_TEXTURE_2D, textureCubeId);
+    //set the texture wrapping parameters
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //set texture filtering parameters
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //load image, create texture and generate mipmaps
+
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    data = stbi_load("player.jpg", &tex_width, &tex_height, &tex_nr_Channels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    //load and create a third texture 
+    unsigned int textureEnemyId;
+
+    glGenTextures(1, &textureEnemyId);
+    glBindTexture(GL_TEXTURE_2D, textureEnemyId);
+    //set the texture wrapping parameters
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //set texture filtering parameters
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //load image, create texture and generate mipmaps
+
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    data = stbi_load("enemy.jpg", &tex_width, &tex_height, &tex_nr_Channels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex_width, tex_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
 
     glfwSetTime(0);
     glfwSwapInterval(1);
@@ -241,10 +358,13 @@ int main()
         glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(ViewMatrix));
         glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
 
-        //floor
+        //ground
+        glBindTexture(GL_TEXTURE_2D, textureFloorId);
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VertexArrayId);
 
-        glUniform4f(1, 0.3f, 0.6f, 0.3f, 1.0f);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(36 * sizeof(unsigned int)));
+        glUniform4f(6, 1.0f, 1.0f, 1.0f, 1.0f);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         //qube
 
@@ -253,9 +373,12 @@ int main()
         ModelMatrix = glm::translate(glm::mat4(1.0f), Me.position);
         ModelMatrix = glm::rotate(ModelMatrix, rot_angle, glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
+       
+        glBindTexture(GL_TEXTURE_2D, textureCubeId);
+        glUseProgram(shaderProgram);
 
-        glUniform4f(1, 0.0f, 0.0f, 1.0f, 1.0f);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glUniform4f(4, 1.0f, 1.0f, 1.0f, 1.0f);
+        glDrawArrays(GL_TRIANGLES, 6, 36);
 
         for (auto b : blocks)
         {
@@ -264,7 +387,9 @@ int main()
             ModelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), b->GetLocation()), b->GetScale());
             glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
             glUniform4f(1, b->GetColor().x, b->GetColor().y, b->GetColor().z, 0.0f);
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+            glBindTexture(GL_TEXTURE_2D, textureEnemyId);
+            glUseProgram(shaderProgram);
+            glDrawArrays(GL_TRIANGLES, 6, 36);
 
         }
 
@@ -344,7 +469,6 @@ int main()
     
     glDeleteVertexArrays(1, &VertexArrayId);
     glDeleteBuffers(1, &VertexBufferId);
-    glDeleteBuffers(1, &ElementBufferId);
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();

@@ -30,4 +30,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="enemy.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="player.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="floor.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

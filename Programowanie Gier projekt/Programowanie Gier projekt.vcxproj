@@ -140,6 +140,11 @@
     <ClInclude Include="Block.h" />
     <ClInclude Include="PlayerClass.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="enemy.jpg" />
+    <Image Include="floor.jpg" />
+    <Image Include="player.jpg" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
