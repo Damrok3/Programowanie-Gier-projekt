@@ -35,6 +35,7 @@ float timeSinceLastMove = 0.0f;
 float timeSinceBulletCreated = 0.0f;
 bool hasEnemyMovedYet = false;
 int score = 0;
+float timeThatBulletExisted = 0.0f;
 
 //shaders
 const char* vertexShaderSource = R"glsl(
@@ -443,16 +444,25 @@ int main()
                 exit(EXIT_SUCCESS);
             }
         }
-
+        
         //killing bullets
         if (blocks.size() > 6)
         {
-            float timeThatBulletExisted = (float)glfwGetTime() - timeSinceBulletCreated;
+            float timeNow = (float)glfwGetTime();
+            if (timeNow < timeSinceBulletCreated)
+            {
+                float temp = timeNow;
+                timeNow = timeSinceBulletCreated;
+                timeSinceBulletCreated = temp;
+            }
+            timeThatBulletExisted = timeNow - timeSinceBulletCreated;
             if (timeThatBulletExisted > 0.5f)
             {
                 blocks.pop_back();
             }
         }
+        std::cout << timeSinceBulletCreated <<"  " << timeThatBulletExisted<< std::endl;
+        
         //killing enemies
         if (blocks.size() >= 7)
         {
@@ -508,11 +518,7 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         Me.Move(glm::vec3(Me.speed * glm::cos(rot_angle), 0.0f, -Me.speed * glm::sin(rot_angle)));
     }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !(Me.jump_active)) {
-        glfwSetTime(0);
-        Me.jump_active = true;
-        currentY = Me.position.y;
-    }
+    
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
     {
         camera_move = glm::vec3(0.0f, 40.0f, 0.0f);
@@ -539,6 +545,11 @@ void processInput(GLFWwindow* window)
                 glm::vec3(0.3f, 0.3f, 0.3f)))->SetAsBullet(glm::cos(rot_angle) * 2, -glm::sin(rot_angle) * 2));
                 timeSinceBulletCreated = (float)glfwGetTime();
         }
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !(Me.jump_active)) {
+        glfwSetTime(0);
+        Me.jump_active = true;
+        currentY = Me.position.y;
     }
 }
 
