@@ -461,7 +461,7 @@ int main()
                 blocks.pop_back();
             }
         }
-        std::cout << timeSinceBulletCreated <<"  " << timeThatBulletExisted<< std::endl;
+    
         
         //killing enemies
         if (blocks.size() >= 7)
