@@ -429,6 +429,20 @@ int main()
                 }
             }
         }
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            glm::vec3 distance = blocks[i]->location - Me.position;
+            float distLength = glm::length(distance);
+            if (distLength < 1)
+            {
+                system("cls");
+                std::cout << "\nYou Lost!\nYour final score is : " << score;
+                glDeleteProgram(shaderProgram);
+                glfwDestroyWindow(window);
+                glfwTerminate();
+                exit(EXIT_SUCCESS);
+            }
+        }
 
         //killing bullets
         if (blocks.size() > 6)
@@ -456,9 +470,15 @@ int main()
                     }
                     else
                     {
-                        std::cout << "Congratulations! You Won!";
+                        std::cout << "Congratulations! You Won!"; 
+                        glDeleteProgram(shaderProgram);
+                        glfwDestroyWindow(window);
+                        glfwTerminate();
+                        exit(EXIT_SUCCESS);
                     }
                 }
+
+               
             }
         }
 
