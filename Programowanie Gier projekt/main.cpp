@@ -480,7 +480,7 @@ int main()
                     }
                     else
                     {
-                        std::cout << "Congratulations! You Won!"; 
+                        std::cout << "Congratulations! You Won!"; //text when we win
                         glDeleteProgram(shaderProgram);
                         glfwDestroyWindow(window);
                         glfwTerminate();
